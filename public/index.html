@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>URL Shortener</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Shortener Section -->
+        <div id="shortenerSection">
+
+            <h1>URL Shortener</h1>
+
+            <p>Enter a long URL and create a short link.</p>
+
+            <form id="urlForm">
+
+                <input
+                    type="text"
+                    id="urlInput"
+                    placeholder="https://example.com"
+                    required
+                >
+
+                <button type="submit">
+                    Shorten URL
+                </button>
+
+            </form>
+
+            <div id="result"></div>
+
+            <button id="historyButton" class="history-button">
+                URL History
+            </button>
+
+        </div>
+
+
+        <!-- History Section -->
+        <div id="historySection" style="display: none;">
+
+            <button id="backButton" class="back-button">
+                ← Back to Shortener
+            </button>
+
+            <h1>URL History</h1>
+
+            <div id="history"></div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
