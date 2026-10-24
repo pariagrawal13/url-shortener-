@@ -1,3 +1,8 @@
+// Netlify pe backend Render pe hai, baaki jagah same server use hoga
+const API_BASE = window.location.hostname.endsWith("netlify.app")
+    ? "https://url-shortener-pxzg.onrender.com"
+    : "";
+
 const form = document.getElementById("urlForm");
 const urlInput = document.getElementById("urlInput");
 const result = document.getElementById("result");
@@ -13,7 +18,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     try {
-        const response = await fetch("/api/shorten", {
+        const response = await fetch(`${API_BASE}/api/shorten`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -28,30 +33,30 @@ form.addEventListener("submit", async (e) => {
         console.log("Server response:", data);
 
         if (data.success) {
-    result.innerHTML = `
-        <p>Short URL:</p>
+            result.innerHTML = `
+                <p>Short URL:</p>
 
-        <a href="${data.shortUrl}" target="_blank">
-            ${data.shortUrl}
-        </a>
+                <a href="${data.shortUrl}" target="_blank">
+                    ${data.shortUrl}
+                </a>
 
-        <br><br>
+                <br><br>
 
-        <button id="copyButton">Copy URL</button>
-    `;
+                <button id="copyButton">Copy URL</button>
+            `;
 
-    const copyButton = document.getElementById("copyButton");
+            const copyButton = document.getElementById("copyButton");
 
-    copyButton.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(data.shortUrl);
+            copyButton.addEventListener("click", async () => {
+                await navigator.clipboard.writeText(data.shortUrl);
 
-        copyButton.textContent = "Copied!";
+                copyButton.textContent = "Copied!";
 
-        setTimeout(() => {
-            copyButton.textContent = "Copy URL";
-        }, 2000);
-    });
-} else {
+                setTimeout(() => {
+                    copyButton.textContent = "Copy URL";
+                }, 2000);
+            });
+        } else {
             result.textContent = data.message || "Something went wrong";
         }
 
@@ -60,12 +65,13 @@ form.addEventListener("submit", async (e) => {
         result.textContent = "Something went wrong. Please try again.";
     }
 });
+
 // Load URL history
 async function loadHistory() {
     const historyContainer = document.getElementById("history");
 
     try {
-        const response = await fetch("/api/history");
+        const response = await fetch(`${API_BASE}/api/history`);
         const data = await response.json();
 
         if (!data.success) {
@@ -81,64 +87,65 @@ async function loadHistory() {
         historyContainer.innerHTML = "";
 
         data.urls.forEach((item) => {
-            const shortUrl = `${window.location.origin}/${item.short_code}`;
+            // Short link hamesha backend ke address se banegi
+            const shortUrl = `${API_BASE || window.location.origin}/${item.short_code}`;
 
             const historyItem = document.createElement("div");
             historyItem.className = "history-item";
 
-         historyItem.innerHTML = `
-    <div class="history-content">
+            historyItem.innerHTML = `
+                <div class="history-content">
 
-        <p>
-            <strong>Original URL:</strong>
-            ${item.original_url}
-        </p>
+                    <p>
+                        <strong>Original URL:</strong>
+                        ${item.original_url}
+                    </p>
 
-        <p>
-            <strong>Short URL:</strong>
-            <a href="${shortUrl}" target="_blank">
-                ${shortUrl}
-            </a>
-        </p>
+                    <p>
+                        <strong>Short URL:</strong>
+                        <a href="${shortUrl}" target="_blank">
+                            ${shortUrl}
+                        </a>
+                    </p>
 
-    </div>
+                </div>
 
-    <div class="history-actions">
+                <div class="history-actions">
 
-        <button class="copy-button" data-url="${shortUrl}">
-            Copy
-        </button>
+                    <button class="copy-button" data-url="${shortUrl}">
+                        Copy
+                    </button>
 
-        <button class="delete-button" onclick="deleteUrl('${item.short_code}')">
-            Delete
-        </button>
+                    <button class="delete-button" onclick="deleteUrl('${item.short_code}')">
+                        Delete
+                    </button>
 
-    </div>
+                </div>
 
-    <div class="created-at">
-        Created: ${formatDate(item.created_at)}
-    </div>
-`;
+                <div class="created-at">
+                    Created: ${formatDate(item.created_at)}
+                </div>
+            `;
 
             historyContainer.appendChild(historyItem);
+
             const copyButton = historyItem.querySelector(".copy-button");
 
-copyButton.addEventListener("click", async () => {
+            copyButton.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(shortUrl);
 
-    try {
-        await navigator.clipboard.writeText(shortUrl);
+                    copyButton.textContent = "Copied!";
 
-        copyButton.textContent = "Copied!";
+                    setTimeout(() => {
+                        copyButton.textContent = "Copy";
+                    }, 1500);
 
-        setTimeout(() => {
-            copyButton.textContent = "Copy";
-        }, 1500);
-
-    } catch (error) {
-        console.error("Copy failed:", error);
-        copyButton.textContent = "Failed";
-    }
-});
+                } catch (error) {
+                    console.error("Copy failed:", error);
+                    copyButton.textContent = "Failed";
+                }
+            });
         });
 
     } catch (error) {
@@ -158,8 +165,10 @@ function formatDate(dateString) {
         minute: "2-digit"
     });
 }
+
 // Load history when page opens
 loadHistory();
+
 // Show history section
 const historyButton = document.getElementById("historyButton");
 const backButton = document.getElementById("backButton");
@@ -174,6 +183,7 @@ historyButton.addEventListener("click", () => {
 
     loadHistory();
 });
+
 async function deleteUrl(shortCode) {
     const confirmDelete = confirm("Are you sure you want to delete this URL?");
 
@@ -182,7 +192,7 @@ async function deleteUrl(shortCode) {
     }
 
     try {
-        const response = await fetch(`/api/${shortCode}`, {
+        const response = await fetch(`${API_BASE}/api/${shortCode}`, {
             method: "DELETE"
         });
 

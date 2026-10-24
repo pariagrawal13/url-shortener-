@@ -18,6 +18,21 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 
+// CORS: Netlify frontend ko backend use karne ki permission
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+
+    // Browser pehle OPTIONS request bhejta hai (POST aur DELETE ke liye)
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
+
+
 // Middleware
 app.use(express.json());
 app.use(express.static("public"));
